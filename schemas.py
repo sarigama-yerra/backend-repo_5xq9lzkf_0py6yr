@@ -11,10 +11,10 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 
-# Example schemas (replace with your own):
+# Example schemas (keep for reference):
 
 class User(BaseModel):
     """
@@ -38,11 +38,19 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Landing page specific schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Lead(BaseModel):
+    """Early access leads"""
+    email: EmailStr = Field(..., description="Email for early access")
+    name: Optional[str] = Field(None, description="Optional name")
+    source: str = Field("landing_page", description="Lead source")
+    consent: bool = Field(True, description="Consent to be contacted")
+
+class Preorder(BaseModel):
+    """Pre-purchase intents/orders"""
+    email: EmailStr = Field(..., description="Customer email")
+    plan: str = Field(..., description="Plan identifier, e.g., early_lifetime, pro_monthly")
+    price_cents: Optional[int] = Field(None, ge=0, description="Price in cents if known")
+    status: str = Field("initiated", description="initiated, pending, paid, cancelled")
+    stripe_session_id: Optional[str] = Field(None, description="Stripe Checkout session id if created")
